@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createBrowserRouter, RouterProvider, Route, Form } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Form } from "react-router-dom";
 import "./styles.css";
 
 function ProductInquiryForm() {
@@ -9,23 +9,48 @@ function ProductInquiryForm() {
     phone: "",
     message: "",
   });
+
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+
+  const validate = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]+$/;
+
+    if (!formData.name.trim()) newErrors.name = "Name is required.";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Phone number must contain only numbers.";
+    }
+    if (!formData.message.trim()) newErrors.message = "Message is required.";
+
+    return newErrors;
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const isValid = form.checkValidity();
-
-    if (isValid) {
-      setSubmitted(true);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
     } else {
-      setSubmitted(false);
+      setErrors({});
+      setSubmitted(true);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
+    }
   };
 
   return (
@@ -46,6 +71,7 @@ function ProductInquiryForm() {
               required
               className="form-input"
             />
+            {errors.name && <p className="error-message">{errors.name}</p>}
           </div>
           <div className="form-group">
             <label htmlFor="email" className="form-label">
@@ -60,6 +86,7 @@ function ProductInquiryForm() {
               required
               className="form-input"
             />
+            {errors.email && <p className="error-message">{errors.email}</p>}
           </div>
           <div className="form-group">
             <label htmlFor="phone" className="form-label">
@@ -74,6 +101,7 @@ function ProductInquiryForm() {
               required
               className="form-input"
             />
+            {errors.phone && <p className="error-message">{errors.phone}</p>}
           </div>
           <div className="form-group">
             <label htmlFor="message" className="form-label">
@@ -87,6 +115,7 @@ function ProductInquiryForm() {
               required
               className="form-textarea"
             />
+            {errors.message && <p className="error-message">{errors.message}</p>}
           </div>
           <button type="submit" className="form-button">
             Submit
@@ -115,7 +144,6 @@ function ProductInquiryForm() {
     </div>
   );
 }
-
 
 const router = createBrowserRouter([
   {
